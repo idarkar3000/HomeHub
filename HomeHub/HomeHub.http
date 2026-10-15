@@ -1,6 +1,91 @@
 @HomeHub_HostAddress = http://localhost:5092
 
-GET {{HomeHub_HostAddress}}/weatherforecast/
+###
+
+GET {{HomeHub_HostAddress}}/api/rooms
 Accept: application/json
+
+###
+
+POST {{HomeHub_HostAddress}}/api/rooms
+Content-Type: application/json
+
+{
+  "name": "Cocina",
+  "icon": "kitchen"
+}
+
+###
+
+GET {{HomeHub_HostAddress}}/api/rooms/1/tasks
+Accept: application/json
+
+###
+
+POST {{HomeHub_HostAddress}}/api/rooms/1/tasks
+Content-Type: application/json
+
+{
+  "title": "Fregar los platos",
+  "isCompleted": false,
+  "dueDate": "2026-10-20T00:00:00",
+  "endDate": null,
+  "recurrence": "weekly"
+}
+
+###
+
+POST {{HomeHub_HostAddress}}/api/rooms/1/tasks
+Content-Type: application/json
+
+{
+  "title": "Regar las plantas",
+  "isCompleted": false,
+  "dueDate": "2026-10-21T15:00:00",
+  "endDate": "2026-10-21T16:00:00",
+  "recurrence": "none"
+}
+
+###
+
+GET {{HomeHub_HostAddress}}/api/tasks/calendar
+Accept: application/json
+
+###
+
+PATCH {{HomeHub_HostAddress}}/api/tasks/1/toggle
+
+###
+
+DELETE {{HomeHub_HostAddress}}/api/tasks/1
+
+###
+
+GET {{HomeHub_HostAddress}}/api/notes
+Accept: application/json
+
+###
+
+GET {{HomeHub_HostAddress}}/api/notes?kind=shopping
+Accept: application/json
+
+###
+
+POST {{HomeHub_HostAddress}}/api/notes
+Content-Type: application/json
+
+{
+  "content": "Comprar bombillas",
+  "kind": "shopping",
+  "roomId": 1
+}
+
+###
+
+PATCH {{HomeHub_HostAddress}}/api/notes/1/toggle
+
+###
+
+DELETE {{HomeHub_HostAddress}}/api/notes/1
 
 ###

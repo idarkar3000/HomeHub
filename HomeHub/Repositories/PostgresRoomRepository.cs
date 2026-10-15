@@ -25,12 +25,12 @@ namespace HomeHub.Repositories
             connection.Execute(sql);
         }
 
-        public void Save(Room room)
+        public int Save(Room room)
         {
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
-            string sql = @"INSERT INTO rooms (name, icon) VALUES (@Name, @Icon);";
-            connection.Execute(sql, room);
+            string sql = @"INSERT INTO rooms (name, icon) VALUES (@Name, @Icon) RETURNING id;";
+            return connection.ExecuteScalar<int>(sql, room);
         }
 
         public List<Room> GetAll()
@@ -38,8 +38,26 @@ namespace HomeHub.Repositories
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
-            string sql = @"SELECT id AS Id, name AS Name, icon AS Icon FROM rooms;";
+            string sql = @"SELECT id AS Id, name AS Name, icon AS Icon FROM rooms ORDER BY id ASC;";
             return connection.Query<Room>(sql).ToList();
+        }
+
+        public Room? GetById(int id)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"SELECT id AS Id, name AS Name, icon AS Icon FROM rooms WHERE id = @Id;";
+            return connection.QueryFirstOrDefault<Room>(sql, new { Id = id });
+        }
+
+        public void Update(Room room)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"UPDATE rooms SET name = @Name, icon = @Icon WHERE id = @Id;";
+            connection.Execute(sql, room);
         }
 
         public void Delete(int id)

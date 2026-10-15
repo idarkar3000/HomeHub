@@ -5,8 +5,9 @@ namespace HomeHub.Repositories
     public interface ITaskRepository
     {
         void InitializeDatabase();
-        void Save(TaskItem task);
+        int Save(TaskItem task);
         List<TaskItem> GetAll();
+        TaskItem? GetById(int id);
         List<TaskItem> GetByRoomId(int roomid);
         List<TaskItem> GetCalendarTask();
         void Update(TaskItem task);

@@ -25,20 +25,24 @@ namespace HomeHub.Repositories
                         title TEXT NOT NULL,
                         is_completed BOOLEAN NOT NULL,
                         due_date TIMESTAMP,
+                        end_date TIMESTAMP,
+                        recurrence TEXT NOT NULL DEFAULT 'none',
                         FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
                         );";
 
             connection.Execute(sql);
+            connection.Execute("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS recurrence TEXT NOT NULL DEFAULT 'none';");
+            connection.Execute("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_date TIMESTAMP;");
         }
 
-        public void Save(TaskItem task)
+        public int Save(TaskItem task)
         {
             using var connection = new NpgsqlConnection(_connectionstring);
             connection.Open();
 
-            string sql = @"INSERT INTO tasks (title, is_completed, due_date, room_id) VALUES (@Title, @IsCompleted, @DueDate, @RoomId);";
+            string sql = @"INSERT INTO tasks (room_id, title, is_completed, due_date, end_date, recurrence) VALUES (@RoomId, @Title, @IsCompleted, @DueDate, @EndDate, @Recurrence) RETURNING id;";
 
-            connection.Execute(sql, task);
+            return connection.ExecuteScalar<int>(sql, task);
         }
 
         public List<TaskItem> GetAll()
@@ -51,10 +55,28 @@ namespace HomeHub.Repositories
                     room_id AS RoomId, 
                     title AS Title, 
                     is_completed AS IsCompleted, 
-                    due_date AS DueDate 
+                    due_date AS DueDate, 
+                    end_date AS EndDate, 
+                    recurrence AS Recurrence 
                    FROM tasks;";
 
             return connection.Query<TaskItem>(sql).ToList();
+        }
+
+        public TaskItem? GetById(int id)
+        {
+            using var connection = new NpgsqlConnection(_connectionstring);
+            connection.Open();
+
+            string sql = @"SELECT id AS Id, 
+                    room_id AS RoomId, 
+                    title AS Title, 
+                    is_completed AS IsCompleted, 
+                    due_date AS DueDate, 
+                    end_date AS EndDate, 
+                    recurrence AS Recurrence 
+                    FROM tasks WHERE id = @Id;";
+            return connection.QueryFirstOrDefault<TaskItem>(sql, new { Id = id });
         }
 
         public List<TaskItem> GetByRoomId(int roomid)
@@ -66,8 +88,10 @@ namespace HomeHub.Repositories
                     room_id AS RoomId, 
                     title AS Title, 
                     is_completed AS IsCompleted, 
-                    due_date AS DueDate 
-                    FROM tasks WHERE room_id = @RoomId;";
+                    due_date AS DueDate, 
+                    end_date AS EndDate, 
+                    recurrence AS Recurrence 
+                    FROM tasks WHERE room_id = @RoomId ORDER BY id ASC;";
             return connection.Query<TaskItem>(sql, new { RoomId = roomid }).ToList();
         }
 
@@ -80,7 +104,9 @@ namespace HomeHub.Repositories
                     room_id AS RoomId, 
                     title AS Title, 
                     is_completed AS IsCompleted, 
-                    due_date AS DueDate 
+                    due_date AS DueDate, 
+                    end_date AS EndDate, 
+                    recurrence AS Recurrence 
                     FROM tasks WHERE due_date IS NOT NULL
                     ORDER BY due_date ASC;";
 
@@ -96,6 +122,8 @@ namespace HomeHub.Repositories
                    SET title = @Title, 
                        is_completed = @IsCompleted, 
                        due_date = @DueDate, 
+                       end_date = @EndDate, 
+                       recurrence = @Recurrence, 
                        room_id = @RoomId 
                    WHERE id = @Id;";
 
