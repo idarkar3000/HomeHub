@@ -1,0 +1,29 @@
+<section class="calendar-page">
+  <header class="calendar-page__header">
+    <h1>Calendario</h1>
+    <p>Arrastra las tareas a un día o a una franja horaria para programarlas.</p>
+  </header>
+
+  <div class="calendar-page__layout">
+    <div class="calendar-page__main">
+      <full-calendar [options]="calendarOptions()" />
+    </div>
+
+    <aside class="calendar-page__tray">
+      <h2>Sin fecha</h2>
+      <p class="calendar-page__hint">Arrastra a un día o a una hora</p>
+
+      <div #unscheduledList class="unscheduled-list">
+        @for (task of unscheduledTasks(); track task.id) {
+          <div class="unscheduled-item" [attr.data-task-id]="task.id">
+            <mat-icon>drag_indicator</mat-icon>
+            <span>{{ task.title }}</span>
+          </div>
+        }
+        @if (unscheduledTasks().length === 0) {
+          <p class="calendar-page__empty">No hay tareas pendientes de agendar.</p>
+        }
+      </div>
+    </aside>
+  </div>
+</section>

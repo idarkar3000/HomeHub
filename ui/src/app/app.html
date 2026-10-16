@@ -1,0 +1,48 @@
+<mat-sidenav-container class="app-shell">
+  @if (!isHandset()) {
+    <mat-sidenav class="app-sidenav" mode="side" opened>
+      <div class="app-sidenav__brand">
+        <span class="app-sidenav__logo"><mat-icon>home</mat-icon></span>
+        <span>HomeHub</span>
+      </div>
+
+      <mat-nav-list>
+        @for (item of navItems; track item.path) {
+          <a mat-list-item [routerLink]="item.path" routerLinkActive="app-nav__item--active">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </mat-sidenav>
+  }
+
+  <mat-sidenav-content
+    class="app-shell__content"
+    [class.app-shell__content--handset]="isHandset()"
+  >
+    <mat-toolbar class="app-toolbar">
+      <span class="app-toolbar__logo"><mat-icon>home</mat-icon></span>
+      <span class="app-toolbar__title">HomeHub</span>
+    </mat-toolbar>
+
+    <div class="app-page">
+      <router-outlet />
+    </div>
+
+    @if (isHandset()) {
+      <nav class="app-bottom-nav">
+        @for (item of navItems; track item.path) {
+          <a
+            class="app-bottom-nav__item"
+            [routerLink]="item.path"
+            routerLinkActive="app-bottom-nav__item--active"
+          >
+            <span class="app-bottom-nav__icon"><mat-icon>{{ item.icon }}</mat-icon></span>
+            <span class="app-bottom-nav__label">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    }
+  </mat-sidenav-content>
+</mat-sidenav-container>

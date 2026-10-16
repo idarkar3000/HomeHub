@@ -1,0 +1,58 @@
+<section class="rooms">
+  <header class="rooms__header">
+    <h1>Mis habitaciones</h1>
+    <p>
+      {{ rooms().length }}
+      {{ rooms().length === 1 ? 'habitación' : 'habitaciones' }}
+    </p>
+  </header>
+
+  @if (rooms().length === 0) {
+    <app-empty-state
+      icon="home_work"
+      title="Aún no hay habitaciones"
+      message="Crea tu primera habitación para empezar a organizar las tareas del hogar."
+    >
+      <button mat-flat-button class="empty-action" (click)="addRoom()">
+        <mat-icon>add</mat-icon>
+        Añadir habitación
+      </button>
+    </app-empty-state>
+  } @else {
+    <div class="rooms__grid">
+      @for (room of rooms(); track room.id) {
+        <mat-card class="room-card" appearance="outlined" (click)="openRoom(room)">
+          <div class="room-card__icon">
+            <mat-icon>{{ room.icon || 'meeting_room' }}</mat-icon>
+          </div>
+          <h2 class="room-card__name">{{ room.name }}</h2>
+          <button
+            mat-icon-button
+            class="room-card__menu"
+            [matMenuTriggerFor]="menu"
+            (click)="$event.stopPropagation()"
+            aria-label="Opciones de la habitación"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editRoom(room, $event)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="deleteRoom(room, $event)">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </mat-card>
+      }
+    </div>
+  }
+
+  @if (rooms().length > 0) {
+    <button mat-fab class="rooms__fab" (click)="addRoom()" aria-label="Añadir habitación">
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+</section>

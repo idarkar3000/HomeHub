@@ -1,0 +1,130 @@
+.room-detail {
+  position: relative;
+  min-height: 100%;
+  padding: 0.5rem 1rem calc(5rem + var(--app-fab-offset, 0px));
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font: var(--mat-sys-headline-small);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    p {
+      margin: 0.15rem 0 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+    }
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+
+  &__filters {
+    margin-bottom: 0.75rem;
+    overflow-x: auto;
+  }
+
+  &__fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + var(--app-fab-offset, 0px) + env(safe-area-inset-bottom));
+    z-index: 2;
+  }
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+  border-radius: 14px;
+  background: var(--mat-sys-surface-container);
+
+  &--done {
+    .task__title {
+      text-decoration: line-through;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.5rem 0.25rem;
+    border: none;
+    background: none;
+    font: var(--mat-sys-body-large);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__title {
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__due,
+  &__recurrence {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-small);
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__recurrence {
+    color: var(--mat-sys-primary);
+  }
+
+  &__delete {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

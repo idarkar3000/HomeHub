@@ -1,0 +1,82 @@
+@if (room(); as room) {
+  <section class="room-detail">
+    <header class="room-detail__header">
+      <button mat-icon-button (click)="goBack()" aria-label="Volver">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="room-detail__title">
+        <div class="room-detail__icon">
+          <mat-icon>{{ room.icon || 'meeting_room' }}</mat-icon>
+        </div>
+        <div>
+          <h1>{{ room.name }}</h1>
+          <p>{{ pendingCount() }} pendientes de {{ tasks().length }}</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="room-detail__filters">
+      <mat-button-toggle-group
+        [value]="filter()"
+        (change)="onFilterChange($event)"
+        hideSingleSelectionIndicator
+        aria-label="Filtrar tareas"
+      >
+        <mat-button-toggle value="all">Todas</mat-button-toggle>
+        <mat-button-toggle value="pending">Pendientes</mat-button-toggle>
+        <mat-button-toggle value="completed">Completadas</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    @if (filteredTasks().length === 0) {
+      <app-empty-state icon="checklist" [title]="emptyTitle()" [message]="emptyMessage()" />
+    } @else {
+      <ul class="task-list">
+        @for (task of filteredTasks(); track task.id) {
+          <li class="task" [class.task--done]="task.isCompleted">
+            <mat-checkbox
+              class="task__check"
+              [checked]="task.isCompleted"
+              (change)="toggle(task)"
+              aria-label="Marcar como completada"
+            />
+            <button type="button" class="task__body" (click)="editTask(task)">
+              <span class="task__title">{{ task.title }}</span>
+              @if (task.dueDate || task.recurrence !== 'none') {
+                <span class="task__meta">
+                  @if (task.dueDate) {
+                    <span class="task__due">
+                      <mat-icon>{{ hasTime(task) ? 'schedule' : 'event' }}</mat-icon>
+                      {{ task.dueDate | date: 'd MMM y' }}
+                      @if (hasTime(task)) {
+                        <span>&middot; {{ task.dueDate | date: 'HH:mm' }}</span>
+                      }
+                    </span>
+                  }
+                  @if (task.recurrence !== 'none') {
+                    <span class="task__recurrence">
+                      <mat-icon>autorenew</mat-icon>
+                      {{ recurrenceLabel(task.recurrence) }}
+                    </span>
+                  }
+                </span>
+              }
+            </button>
+            <button
+              mat-icon-button
+              class="task__delete"
+              (click)="deleteTask(task)"
+              aria-label="Eliminar tarea"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <button mat-fab class="room-detail__fab" (click)="addTask()" aria-label="Añadir tarea">
+      <mat-icon>add</mat-icon>
+    </button>
+  </section>
+}

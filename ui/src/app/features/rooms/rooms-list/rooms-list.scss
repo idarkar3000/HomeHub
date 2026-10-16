@@ -1,0 +1,80 @@
+.rooms {
+  position: relative;
+  min-height: 100%;
+  padding: 1rem 1rem calc(5rem + var(--app-fab-offset, 0px));
+
+  &__header {
+    margin-bottom: 1rem;
+
+    h1 {
+      margin: 0;
+      font: var(--mat-sys-headline-small);
+    }
+
+    p {
+      margin: 0.25rem 0 0;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + var(--app-fab-offset, 0px) + env(safe-area-inset-bottom));
+    z-index: 2;
+  }
+}
+
+.room-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  border-radius: 20px;
+  background: var(--mat-sys-surface-container);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  &__name {
+    margin: 0;
+    font: var(--mat-sys-title-medium);
+  }
+
+  &__menu {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.empty-action {
+  margin-top: 0.75rem;
+}

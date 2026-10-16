@@ -1,0 +1,48 @@
+<section class="notes-page">
+  <header class="notes-page__header">
+    <h1>{{ title() }}</h1>
+  </header>
+
+  <mat-button-toggle-group
+    class="notes-page__switch"
+    [value]="kind()"
+    (change)="setKind($event)"
+    hideSingleSelectionIndicator
+    aria-label="Tipo de lista"
+  >
+    <mat-button-toggle value="note">
+      <mat-icon>sticky_note_2</mat-icon>
+      Notas
+    </mat-button-toggle>
+    <mat-button-toggle value="shopping">
+      <mat-icon>shopping_cart</mat-icon>
+      Compra
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <form class="notes-page__add" [formGroup]="form" (ngSubmit)="add()">
+    <mat-form-field appearance="outline" class="notes-page__input" subscriptSizing="dynamic">
+      <mat-label>{{ placeholder() }}</mat-label>
+      <input matInput formControlName="content" maxlength="120" />
+    </mat-form-field>
+    <button mat-fab type="submit" [disabled]="form.invalid" aria-label="Añadir">
+      <mat-icon>add</mat-icon>
+    </button>
+  </form>
+
+  @if (notes().length === 0) {
+    <app-empty-state icon="checklist" title="Nada por aquí" [message]="emptyMessage()" />
+  } @else {
+    <ul class="note-list">
+      @for (note of notes(); track note.id) {
+        <li class="note" [class.note--done]="note.isDone">
+          <mat-checkbox [checked]="note.isDone" (change)="toggle(note.id)" aria-label="Hecho" />
+          <span class="note__content">{{ note.content }}</span>
+          <button mat-icon-button (click)="remove(note.id)" aria-label="Eliminar">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>
