@@ -1,4 +1,5 @@
-﻿using HomeHub.Models;
+﻿using System.Security.Claims;
+using HomeHub.Models;
 using HomeHub.Models.Dtos;
 using HomeHub.Repositories;
 
@@ -8,45 +9,48 @@ namespace HomeHub.Endpoints
     {
         public static void MapTaskEndpoints(this WebApplication app)
         {
-            app.MapGet("/api/tasks", (ITaskRepository repository) =>
+            app.MapGet("/api/tasks", (ITaskRepository repository, ClaimsPrincipal user) =>
             {
-                var tasks = repository.GetAll();
+                var tasks = repository.GetAll(user.GetUserId());
                 return Results.Ok(tasks);
-            });
+            }).RequireAuthorization();
 
-            app.MapGet("/api/tasks/calendar", (ITaskRepository repository) =>
+            app.MapGet("/api/tasks/calendar", (ITaskRepository repository, ClaimsPrincipal user) =>
             {
-                var tasks = repository.GetCalendarTask();
+                var tasks = repository.GetCalendarTask(user.GetUserId());
                 return Results.Ok(tasks);
-            });
+            }).RequireAuthorization();
 
-            app.MapGet("/api/tasks/{id}", (int id, ITaskRepository repository) =>
+            app.MapGet("/api/tasks/{id}", (int id, ITaskRepository repository, ClaimsPrincipal user) =>
             {
-                var task = repository.GetById(id);
+                var task = repository.GetById(id, user.GetUserId());
                 return task is null ? Results.NotFound() : Results.Ok(task);
-            });
+            }).RequireAuthorization();
 
-            app.MapGet("/api/rooms/{roomId}/tasks", (int roomId, ITaskRepository repository, IRoomRepository roomRepository) =>
+            app.MapGet("/api/rooms/{roomId}/tasks", (int roomId, ITaskRepository repository, IRoomRepository roomRepository, ClaimsPrincipal user) =>
             {
-                var room = roomRepository.GetById(roomId);
+                var userId = user.GetUserId();
+                var room = roomRepository.GetById(roomId, userId);
                 if (room is null)
                     return Results.NotFound();
 
-                var tasks = repository.GetByRoomId(roomId);
+                var tasks = repository.GetByRoomId(roomId, userId);
                 return Results.Ok(tasks);
-            });
+            }).RequireAuthorization();
 
-            app.MapPost("/api/rooms/{roomId}/tasks", (int roomId, TaskRequest request, ITaskRepository repository, IRoomRepository roomRepository) =>
+            app.MapPost("/api/rooms/{roomId}/tasks", (int roomId, TaskRequest request, ITaskRepository repository, IRoomRepository roomRepository, ClaimsPrincipal user) =>
             {
                 if (string.IsNullOrWhiteSpace(request.Title))
                     return Results.BadRequest();
 
-                var room = roomRepository.GetById(roomId);
+                var userId = user.GetUserId();
+                var room = roomRepository.GetById(roomId, userId);
                 if (room is null)
                     return Results.NotFound();
 
                 var task = new TaskItem
                 {
+                    UserId = userId,
                     RoomId = roomId,
                     Title = request.Title,
                     IsCompleted = request.IsCompleted,
@@ -57,18 +61,19 @@ namespace HomeHub.Endpoints
 
                 task.Id = repository.Save(task);
                 return Results.Created($"/api/tasks/{task.Id}", task);
-            });
+            }).RequireAuthorization();
 
-            app.MapPut("/api/tasks/{id}", (int id, TaskRequest request, ITaskRepository repository, IRoomRepository roomRepository) =>
+            app.MapPut("/api/tasks/{id}", (int id, TaskRequest request, ITaskRepository repository, IRoomRepository roomRepository, ClaimsPrincipal user) =>
             {
                 if (string.IsNullOrWhiteSpace(request.Title))
                     return Results.BadRequest();
 
-                var task = repository.GetById(id);
+                var userId = user.GetUserId();
+                var task = repository.GetById(id, userId);
                 if (task is null)
                     return Results.NotFound();
 
-                var room = roomRepository.GetById(request.RoomId);
+                var room = roomRepository.GetById(request.RoomId, userId);
                 if (room is null)
                     return Results.NotFound();
 
@@ -81,11 +86,11 @@ namespace HomeHub.Endpoints
 
                 repository.Update(task);
                 return Results.Ok(task);
-            });
+            }).RequireAuthorization();
 
-            app.MapPatch("/api/tasks/{id}/toggle", (int id, ITaskRepository repository) =>
+            app.MapPatch("/api/tasks/{id}/toggle", (int id, ITaskRepository repository, ClaimsPrincipal user) =>
             {
-                var task = repository.GetById(id);
+                var task = repository.GetById(id, user.GetUserId());
                 if (task is null)
                     return Results.NotFound();
 
@@ -103,17 +108,17 @@ namespace HomeHub.Endpoints
 
                 repository.Update(task);
                 return Results.Ok(task);
-            });
+            }).RequireAuthorization();
 
-            app.MapDelete("/api/tasks/{id}", (int id, ITaskRepository repository) =>
+            app.MapDelete("/api/tasks/{id}", (int id, ITaskRepository repository, ClaimsPrincipal user) =>
             {
-                var task = repository.GetById(id);
+                var task = repository.GetById(id, user.GetUserId());
                 if (task is null)
                     return Results.NotFound();
 
-                repository.Delete(id);
+                repository.Delete(id, user.GetUserId());
                 return Results.NoContent();
-            });
+            }).RequireAuthorization();
         }
     }
 }

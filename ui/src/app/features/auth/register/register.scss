@@ -1,0 +1,62 @@
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  background: var(--mat-sys-surface);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--mat-sys-primary);
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    h1 {
+      margin: 0;
+      font: var(--mat-sys-headline-small);
+    }
+  }
+
+  h2 {
+    margin: 0.5rem 0 1rem;
+    text-align: center;
+    font: var(--mat-sys-title-medium);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__link {
+    text-align: center;
+    font: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface-variant);
+
+    a {
+      color: var(--mat-sys-primary);
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}

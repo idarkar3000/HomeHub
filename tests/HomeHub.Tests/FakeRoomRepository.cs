@@ -19,14 +19,14 @@ public class FakeRoomRepository : IRoomRepository
         return room.Id;
     }
 
-    public List<Room> GetAll()
+    public List<Room> GetAll(int userId)
     {
-        return _rooms;
+        return _rooms.Where(room => room.UserId == userId).ToList();
     }
 
-    public Room? GetById(int id)
+    public Room? GetById(int id, int userId)
     {
-        return _rooms.FirstOrDefault(room => room.Id == id);
+        return _rooms.FirstOrDefault(room => room.Id == id && room.UserId == userId);
     }
 
     public void Update(Room room)
@@ -38,8 +38,8 @@ public class FakeRoomRepository : IRoomRepository
         }
     }
 
-    public void Delete(int id)
+    public void Delete(int id, int userId)
     {
-        _rooms.RemoveAll(room => room.Id == id);
+        _rooms.RemoveAll(room => room.Id == id && room.UserId == userId);
     }
 }

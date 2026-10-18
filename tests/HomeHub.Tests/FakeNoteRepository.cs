@@ -20,19 +20,21 @@ public class FakeNoteRepository : INoteRepository
         return note.Id;
     }
 
-    public List<Note> GetAll(string? kind)
+    public List<Note> GetAll(string? kind, int userId)
     {
-        if (string.IsNullOrEmpty(kind))
+        var query = _notes.Where(note => note.UserId == userId);
+
+        if (!string.IsNullOrEmpty(kind))
         {
-            return _notes;
+            query = query.Where(note => note.Kind == kind);
         }
 
-        return _notes.Where(note => note.Kind == kind).ToList();
+        return query.ToList();
     }
 
-    public Note? GetById(int id)
+    public Note? GetById(int id, int userId)
     {
-        return _notes.FirstOrDefault(note => note.Id == id);
+        return _notes.FirstOrDefault(note => note.Id == id && note.UserId == userId);
     }
 
     public void Update(Note note)
@@ -44,8 +46,8 @@ public class FakeNoteRepository : INoteRepository
         }
     }
 
-    public void Delete(int id)
+    public void Delete(int id, int userId)
     {
-        _notes.RemoveAll(note => note.Id == id);
+        _notes.RemoveAll(note => note.Id == id && note.UserId == userId);
     }
 }

@@ -8,8 +8,18 @@
   background: var(--mat-sys-surface);
 }
 
+.app-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
 .app-sidenav {
   width: 248px;
+  display: flex;
+  flex-direction: column;
   background: var(--mat-sys-surface-container-low);
 
   &__brand {
@@ -37,6 +47,27 @@
       width: 22px;
       height: 22px;
     }
+  }
+
+  mat-nav-list {
+    flex: 1;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
   }
 }
 
@@ -75,6 +106,19 @@
     font: var(--mat-sys-title-large);
     font-weight: 600;
     letter-spacing: 0.01em;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__email {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--mat-sys-body-small);
+    opacity: 0.9;
   }
 }
 

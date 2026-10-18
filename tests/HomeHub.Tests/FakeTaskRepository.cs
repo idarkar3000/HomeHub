@@ -19,24 +19,27 @@ public class FakeTaskRepository : ITaskRepository
         return task.Id;
     }
 
-    public List<TaskItem> GetAll()
+    public List<TaskItem> GetAll(int userId)
     {
-        return _tasks;
+        return _tasks.Where(task => task.UserId == userId).ToList();
     }
 
-    public TaskItem? GetById(int id)
+    public TaskItem? GetById(int id, int userId)
     {
-        return _tasks.FirstOrDefault(task => task.Id == id);
+        return _tasks.FirstOrDefault(task => task.Id == id && task.UserId == userId);
     }
 
-    public List<TaskItem> GetByRoomId(int roomid)
+    public List<TaskItem> GetByRoomId(int roomid, int userId)
     {
-        return _tasks.Where(task => task.RoomId == roomid).ToList();
+        return _tasks.Where(task => task.RoomId == roomid && task.UserId == userId).ToList();
     }
 
-    public List<TaskItem> GetCalendarTask()
+    public List<TaskItem> GetCalendarTask(int userId)
     {
-        return _tasks.Where(task => task.DueDate != null).OrderBy(task => task.DueDate).ToList();
+        return _tasks
+            .Where(task => task.UserId == userId && task.DueDate != null)
+            .OrderBy(task => task.DueDate)
+            .ToList();
     }
 
     public void Update(TaskItem task)
@@ -48,8 +51,8 @@ public class FakeTaskRepository : ITaskRepository
         }
     }
 
-    public void Delete(int id)
+    public void Delete(int id, int userId)
     {
-        _tasks.RemoveAll(task => task.Id == id);
+        _tasks.RemoveAll(task => task.Id == id && task.UserId == userId);
     }
 }

@@ -1,5 +1,10 @@
+using System.Text;
 using HomeHub.Endpoints;
 using HomeHub.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,17 +14,41 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddTransient<IRoomRepository>(provider => new PostgresRoomRepository(connectionString));
 builder.Services.AddTransient<ITaskRepository>(provider => new PostgresTaskRepository(connectionString));
 builder.Services.AddTransient<INoteRepository>(provider => new PostgresNoteRepository(connectionString));
+builder.Services.AddTransient<IUserRepository>(provider => new PostgresUserRepository(connectionString));
+
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt 'Key' not found.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:4200" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -32,6 +61,8 @@ using (var scope = app.Services.CreateScope())
     var roomRepository = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
     var taskRepository = scope.ServiceProvider.GetRequiredService<ITaskRepository>();
     var noteRepository = scope.ServiceProvider.GetRequiredService<INoteRepository>();
+    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+    userRepository.InitializeDatabase();
     roomRepository.InitializeDatabase();
     taskRepository.InitializeDatabase();
     noteRepository.InitializeDatabase();
@@ -45,13 +76,35 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+{
+    var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+    context.Response.StatusCode = error is UnauthorizedAccessException
+        ? StatusCodes.Status401Unauthorized
+        : StatusCodes.Status500InternalServerError;
+
+    await context.Response.WriteAsJsonAsync(new { error = "Se ha producido un error al procesar la solicitud." });
+}));
+
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapRoomEndpoints();
 app.MapTaskEndpoints();
 app.MapNoteEndpoints();
+app.MapAuthEndpoints();
 
 app.Run();
 

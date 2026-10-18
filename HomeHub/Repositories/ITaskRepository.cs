@@ -6,11 +6,11 @@ namespace HomeHub.Repositories
     {
         void InitializeDatabase();
         int Save(TaskItem task);
-        List<TaskItem> GetAll();
-        TaskItem? GetById(int id);
-        List<TaskItem> GetByRoomId(int roomid);
-        List<TaskItem> GetCalendarTask();
+        List<TaskItem> GetAll(int userId);
+        TaskItem? GetById(int id, int userId);
+        List<TaskItem> GetByRoomId(int roomid, int userId);
+        List<TaskItem> GetCalendarTask(int userId);
         void Update(TaskItem task);
-        void Delete(int id);
+        void Delete(int id, int userId);
     }
 }

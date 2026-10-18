@@ -10,6 +10,12 @@
     }
   }
 
+  &__subtitle {
+    margin: 0.25rem 0 0;
+    font: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
   &__switch {
     margin-bottom: 1rem;
   }

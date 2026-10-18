@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: homehub-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: HomeHub
+      - key: Jwt__Audience
+        value: HomeHub
+      - key: Cors__AllowedOrigins__0
+        sync: false

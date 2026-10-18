@@ -6,9 +6,9 @@ namespace HomeHub.Repositories
     {
         void InitializeDatabase();
         int Save(Note note);
-        List<Note> GetAll(string? kind);
-        Note? GetById(int id);
+        List<Note> GetAll(string? kind, int userId);
+        Note? GetById(int id, int userId);
         void Update(Note note);
-        void Delete(int id);
+        void Delete(int id, int userId);
     }
 }
