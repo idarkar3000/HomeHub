@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://homehub-api.onrender.com',
+  apiUrl: 'https://homehub-yhjb.onrender.com',
 };
