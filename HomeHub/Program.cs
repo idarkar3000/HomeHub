@@ -101,6 +101,7 @@ app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthEndpoints();
 app.MapRoomEndpoints();
 app.MapTaskEndpoints();
 app.MapNoteEndpoints();
