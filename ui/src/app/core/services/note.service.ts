@@ -22,6 +22,10 @@ export class NoteService {
     return this.http.post<Note>(this.baseUrl, request);
   }
 
+  update(id: number, request: NoteRequest): Observable<Note> {
+    return this.http.put<Note>(`${this.baseUrl}/${id}`, request);
+  }
+
   toggle(id: number): Observable<Note> {
     return this.http.patch<Note>(`${this.baseUrl}/${id}/toggle`, {});
   }

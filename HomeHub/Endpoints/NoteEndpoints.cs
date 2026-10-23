@@ -21,17 +21,23 @@ namespace HomeHub.Endpoints
                 return note is null ? Results.NotFound() : Results.Ok(note);
             }).RequireAuthorization();
 
-            app.MapPost("/api/notes", (NoteRequest request, INoteRepository repository, ClaimsPrincipal user) =>
+            app.MapPost("/api/notes", (NoteRequest request, INoteRepository repository, IShoppingCategoryRepository categoryRepository, ClaimsPrincipal user) =>
             {
                 if (string.IsNullOrWhiteSpace(request.Content))
                     return Results.BadRequest();
 
+                var userId = user.GetUserId();
+
+                if (request.CategoryId is int categoryId && categoryRepository.GetById(categoryId, userId) is null)
+                    return Results.BadRequest(new { error = "La etiqueta indicada no existe." });
+
                 var note = new Note
                 {
-                    UserId = user.GetUserId(),
+                    UserId = userId,
                     Content = request.Content,
                     Kind = string.IsNullOrWhiteSpace(request.Kind) ? "note" : request.Kind,
-                    RoomId = request.RoomId
+                    RoomId = request.RoomId,
+                    CategoryId = request.CategoryId
                 };
 
                 note.Id = repository.Save(note);
@@ -39,7 +45,7 @@ namespace HomeHub.Endpoints
                 return Results.Created($"/api/notes/{note.Id}", created);
             }).RequireAuthorization();
 
-            app.MapPut("/api/notes/{id}", (int id, NoteRequest request, INoteRepository repository, ClaimsPrincipal user) =>
+            app.MapPut("/api/notes/{id}", (int id, NoteRequest request, INoteRepository repository, IShoppingCategoryRepository categoryRepository, ClaimsPrincipal user) =>
             {
                 if (string.IsNullOrWhiteSpace(request.Content))
                     return Results.BadRequest();
@@ -48,9 +54,13 @@ namespace HomeHub.Endpoints
                 if (note is null)
                     return Results.NotFound();
 
+                if (request.CategoryId is int categoryId && categoryRepository.GetById(categoryId, user.GetUserId()) is null)
+                    return Results.BadRequest(new { error = "La etiqueta indicada no existe." });
+
                 note.Content = request.Content;
                 note.Kind = string.IsNullOrWhiteSpace(request.Kind) ? "note" : request.Kind;
                 note.RoomId = request.RoomId;
+                note.CategoryId = request.CategoryId;
 
                 repository.Update(note);
                 return Results.Ok(note);

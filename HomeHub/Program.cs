@@ -14,6 +14,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddTransient<IRoomRepository>(provider => new PostgresRoomRepository(connectionString));
 builder.Services.AddTransient<ITaskRepository>(provider => new PostgresTaskRepository(connectionString));
 builder.Services.AddTransient<INoteRepository>(provider => new PostgresNoteRepository(connectionString));
+builder.Services.AddTransient<IShoppingCategoryRepository>(provider => new PostgresShoppingCategoryRepository(connectionString));
 builder.Services.AddTransient<IUserRepository>(provider => new PostgresUserRepository(connectionString));
 
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -61,8 +62,10 @@ using (var scope = app.Services.CreateScope())
     var roomRepository = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
     var taskRepository = scope.ServiceProvider.GetRequiredService<ITaskRepository>();
     var noteRepository = scope.ServiceProvider.GetRequiredService<INoteRepository>();
+    var categoryRepository = scope.ServiceProvider.GetRequiredService<IShoppingCategoryRepository>();
     var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
     userRepository.InitializeDatabase();
+    categoryRepository.InitializeDatabase();
     roomRepository.InitializeDatabase();
     taskRepository.InitializeDatabase();
     noteRepository.InitializeDatabase();
@@ -105,6 +108,7 @@ app.MapHealthEndpoints();
 app.MapRoomEndpoints();
 app.MapTaskEndpoints();
 app.MapNoteEndpoints();
+app.MapShoppingCategoryEndpoints();
 app.MapAuthEndpoints();
 
 app.Run();

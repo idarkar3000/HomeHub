@@ -24,11 +24,13 @@ public class FakeApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<IRoomRepository>();
             services.RemoveAll<ITaskRepository>();
             services.RemoveAll<INoteRepository>();
+            services.RemoveAll<IShoppingCategoryRepository>();
             services.RemoveAll<IUserRepository>();
 
             services.AddSingleton<IRoomRepository, FakeRoomRepository>();
             services.AddSingleton<ITaskRepository, FakeTaskRepository>();
             services.AddSingleton<INoteRepository, FakeNoteRepository>();
+            services.AddSingleton<IShoppingCategoryRepository, FakeShoppingCategoryRepository>();
             services.AddSingleton<IUserRepository, FakeUserRepository>();
 
             services.AddAuthentication(TestAuthHandler.SchemeName)

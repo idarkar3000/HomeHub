@@ -6,6 +6,7 @@ export interface Note {
   isDone: boolean;
   kind: NoteKind;
   roomId: number | null;
+  categoryId: number | null;
   createdAt: string;
 }
 
@@ -13,4 +14,5 @@ export interface NoteRequest {
   content: string;
   kind: NoteKind;
   roomId: number | null;
+  categoryId: number | null;
 }

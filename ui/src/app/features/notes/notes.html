@@ -21,29 +21,115 @@
     </mat-button-toggle>
   </mat-button-toggle-group>
 
+  @if (kind() === 'shopping') {
+    <div class="shop-cats">
+      <button
+        type="button"
+        class="shop-cat"
+        [class.shop-cat--active]="categoryFilter() === null"
+        (click)="selectCategory(null)"
+      >
+        Todas
+      </button>
+
+      @for (category of categories(); track category.id) {
+        <span class="shop-cat" [class.shop-cat--active]="categoryFilter() === category.id">
+          <button type="button" class="shop-cat__label" (click)="selectCategory(category.id)">
+            {{ category.name }}
+          </button>
+          <button
+            type="button"
+            class="shop-cat__remove"
+            (click)="deleteCategory(category)"
+            [attr.aria-label]="'Eliminar etiqueta ' + category.name"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </span>
+      }
+
+      <button type="button" class="shop-cat shop-cat--add" (click)="toggleCategoryForm()">
+        <mat-icon>add</mat-icon>
+        Etiqueta
+      </button>
+    </div>
+
+    @if (creatingCategory()) {
+      <form
+        class="notes-page__category-form"
+        [formGroup]="categoryForm"
+        (ngSubmit)="createCategory()"
+      >
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="notes-page__input">
+          <mat-label>Nueva etiqueta</mat-label>
+          <input
+            matInput
+            formControlName="name"
+            maxlength="30"
+            [errorStateMatcher]="errorStateMatcher"
+          />
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="categoryForm.invalid">Crear</button>
+      </form>
+    }
+  }
+
   <form class="notes-page__add" [formGroup]="form" (ngSubmit)="add()">
     <mat-form-field appearance="outline" class="notes-page__input" subscriptSizing="dynamic">
       <mat-label>{{ placeholder() }}</mat-label>
-      <input matInput formControlName="content" maxlength="120" />
+      <input
+        matInput
+        formControlName="content"
+        maxlength="120"
+        [errorStateMatcher]="errorStateMatcher"
+      />
     </mat-form-field>
     <button mat-fab type="submit" [disabled]="form.invalid" aria-label="Añadir">
       <mat-icon>add</mat-icon>
     </button>
   </form>
 
-  @if (notes().length === 0) {
+  @if (groupedNotes().length === 0) {
     <app-empty-state icon="checklist" title="Nada por aquí" [message]="emptyMessage()" />
   } @else {
-    <ul class="note-list">
-      @for (note of notes(); track note.id) {
-        <li class="note" [class.note--done]="note.isDone">
-          <mat-checkbox [checked]="note.isDone" (change)="toggle(note.id)" aria-label="Hecho" />
-          <span class="note__content">{{ note.content }}</span>
-          <button mat-icon-button (click)="remove(note.id)" aria-label="Eliminar">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
-        </li>
+    @for (group of groupedNotes(); track group.id) {
+      @if (kind() === 'shopping') {
+        <h2 class="shop-group">{{ group.name }}</h2>
       }
-    </ul>
+
+      <ul class="note-list">
+        @for (note of group.notes; track note.id) {
+          <li class="note" [class.note--done]="note.isDone">
+            <mat-checkbox [checked]="note.isDone" (change)="toggle(note.id)" aria-label="Hecho" />
+            <span class="note__content">{{ note.content }}</span>
+
+            @if (kind() === 'shopping') {
+              <button
+                type="button"
+                class="note__category"
+                [class.note__category--empty]="note.categoryId === null"
+                [matMenuTriggerFor]="categoryMenu"
+              >
+                {{ categoryName(note.categoryId) }}
+              </button>
+              <mat-menu #categoryMenu="matMenu">
+                <button type="button" mat-menu-item (click)="assignCategory(note, null)">
+                  Sin etiqueta
+                </button>
+                @for (category of categories(); track category.id) {
+                  <button type="button" mat-menu-item (click)="assignCategory(note, category.id)">
+                    {{ category.name }}
+                  </button>
+                }
+              </mat-menu>
+            }
+
+            <button mat-icon-button (click)="remove(note.id)" aria-label="Eliminar">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
   }
 </section>

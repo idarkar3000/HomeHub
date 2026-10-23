@@ -8,6 +8,7 @@ namespace HomeHub.Models
         public bool IsDone { get; set; }
         public string Kind { get; set; } = "note";
         public int? RoomId { get; set; }
+        public int? CategoryId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

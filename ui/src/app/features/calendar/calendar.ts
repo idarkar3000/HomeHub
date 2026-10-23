@@ -67,6 +67,9 @@ export class CalendarPage implements OnInit, AfterViewInit {
     },
     editable: true,
     droppable: true,
+    longPressDelay: 200,
+    eventLongPressDelay: 200,
+    selectLongPressDelay: 200,
     dayMaxEvents: true,
     events: this.tasks()
       .filter((task) => task.dueDate !== null)
@@ -86,6 +89,7 @@ export class CalendarPage implements OnInit, AfterViewInit {
     if (element) {
       new Draggable(element, {
         itemSelector: '.unscheduled-item',
+        longPressDelay: 200,
         eventData: (el) => {
           const taskId = Number(el.getAttribute('data-task-id'));
           const task = this.tasks().find((item) => item.id === taskId);

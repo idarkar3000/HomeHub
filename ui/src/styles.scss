@@ -50,13 +50,30 @@ body {
   --fc-event-border-color: var(--mat-sys-primary);
   --fc-event-text-color: var(--mat-sys-on-primary);
 
+  .fc-toolbar.fc-header-toolbar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+    row-gap: 0.5rem;
+  }
+
+  .fc-toolbar-chunk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .fc-toolbar-title {
     font: var(--mat-sys-title-large);
+    white-space: nowrap;
   }
 
   .fc-button {
+    padding: 0.35rem 0.65rem;
     background: var(--mat-sys-primary);
     border-color: var(--mat-sys-primary);
+    font-size: 0.85rem;
   }
 
   .fc-button-primary:not(:disabled).fc-button-active,
@@ -107,5 +124,30 @@ body {
   .event-completed {
     text-decoration: line-through;
     opacity: 0.6;
+  }
+}
+
+@media (max-width: 720px) {
+  .fc {
+    .fc-toolbar.fc-header-toolbar {
+      justify-content: center;
+    }
+
+    .fc-toolbar-title {
+      font-size: 1.05rem;
+      text-align: center;
+    }
+
+    .fc-button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.78rem;
+    }
+  }
+}
+
+@media (hover: none) {
+  .fc-event,
+  .unscheduled-item {
+    touch-action: none;
   }
 }
