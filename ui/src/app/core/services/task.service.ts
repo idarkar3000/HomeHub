@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TaskItem, TaskRequest } from '../models/task.model';
 
@@ -16,9 +16,7 @@ export class TaskService {
   }
 
   loadByRoom(roomId: number): Observable<TaskItem[]> {
-    return this.http
-      .get<TaskItem[]>(`${environment.apiUrl}/api/rooms/${roomId}/tasks`)
-      .pipe(tap((tasks) => this.tasks.set(tasks)));
+    return this.http.get<TaskItem[]>(`${environment.apiUrl}/api/rooms/${roomId}/tasks`);
   }
 
   create(roomId: number, request: TaskRequest): Observable<TaskItem> {

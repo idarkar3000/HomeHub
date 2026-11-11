@@ -1,8 +1,8 @@
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Learn more about theming and how to apply it to your application at
+// https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
 html {
@@ -13,7 +13,13 @@ html {
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain: 'Nunito',
+        brand: 'Fredoka',
+        bold: 'Fredoka',
+        medium: 'Nunito',
+        regular: 'Nunito',
+      ),
       density: 0,
     )
   );
@@ -21,9 +27,9 @@ html {
 
 body {
   // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // `dark` to enable the dark color theme, or `light dark` to defer to the
   // user's system settings.
-  color-scheme: light;
+  color-scheme: light dark;
 
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
@@ -40,6 +46,48 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+}
+
+body {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 30%, transparent) padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 45%, transparent) padding-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 28px;
+  --mat-dialog-container-shape: 28px;
+}
+
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: 16px;
+  --mat-form-field-outline-radius: 16px;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 16px;
+  --mat-snackbar-container-shape: 16px;
 }
 
 .fc {
@@ -86,6 +134,10 @@ body {
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .fc-daygrid-event,
@@ -142,12 +194,5 @@ body {
       padding: 0.25rem 0.5rem;
       font-size: 0.78rem;
     }
-  }
-}
-
-@media (hover: none) {
-  .fc-event,
-  .unscheduled-item {
-    touch-action: none;
   }
 }

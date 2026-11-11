@@ -1,36 +1,74 @@
-<section class="auth-page">
-  <div class="auth-card">
-    <div class="auth-card__brand">
-      <mat-icon>home</mat-icon>
-      <h1>HomeHub</h1>
+<section class="auth">
+  <aside class="auth__art" aria-hidden="true">
+    <span class="auth__blob auth__blob--one"></span>
+    <span class="auth__blob auth__blob--two"></span>
+    <span class="auth__grain"></span>
+
+    <span class="auth__float auth__float--calendar"><mat-icon>calendar_month</mat-icon></span>
+    <span class="auth__float auth__float--check"><mat-icon>task_alt</mat-icon></span>
+    <span class="auth__float auth__float--cart"><mat-icon>shopping_cart</mat-icon></span>
+
+    <div class="auth__pitch">
+      <span class="auth__pitch-logo"><mat-icon>home</mat-icon></span>
+      <h1>Tu casa, en orden.<br />Tus tareas, donde quieras.</h1>
+      <ul>
+        <li><mat-icon>drag_indicator</mat-icon> Calendario con arrastrar y soltar</li>
+        <li><mat-icon>bolt</mat-icon> Lista de la compra en tiempo real</li>
+        <li><mat-icon>install_mobile</mat-icon> Instalable en móvil y ordenador</li>
+      </ul>
     </div>
+  </aside>
 
-    <h2>Iniciar sesión</h2>
+  <div class="auth__panel">
+    <div class="auth-card">
+      <span class="auth-card__glow"></span>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" autocomplete="email" />
-        @if (form.controls.email.hasError('required')) {
-          <mat-error>El email es obligatorio</mat-error>
-        } @else if (form.controls.email.hasError('email')) {
-          <mat-error>Introduce un email válido</mat-error>
-        }
-      </mat-form-field>
+      <div class="auth-card__brand">
+        <span class="auth-card__logo"><mat-icon>home</mat-icon></span>
+        <h1>HomeHub</h1>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contraseña</mat-label>
-        <input matInput type="password" formControlName="password" autocomplete="current-password" />
-        @if (form.controls.password.hasError('required')) {
-          <mat-error>La contraseña es obligatoria</mat-error>
-        }
-      </mat-form-field>
+      <h2>Qué gusto verte por casa</h2>
+      <p class="auth-card__sub">Entra para retomar tus tareas del hogar.</p>
 
-      <button mat-flat-button type="submit" class="full-width" [disabled]="form.invalid || loading()">
-        Entrar
-      </button>
-    </form>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>El email es obligatorio</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Introduce un email válido</mat-error>
+          }
+        </mat-form-field>
 
-    <p class="auth-card__link">¿No tienes cuenta? <a routerLink="/register">Crear una</a></p>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <mat-label>Contraseña</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>La contraseña es obligatoria</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="auth-card__submit full-width"
+          [disabled]="form.invalid || loading()"
+        >
+          {{ loading() ? 'Entrando…' : 'Entrar' }}
+          @if (!loading()) {
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          }
+        </button>
+      </form>
+
+      <p class="auth-card__link">¿No tienes cuenta? <a routerLink="/register">Crear una</a></p>
+    </div>
   </div>
 </section>

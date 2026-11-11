@@ -18,6 +18,8 @@ public class FakeApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jwt:Key", "test-key-for-homehub-tests-1234567890");
         builder.UseSetting("Jwt:Issuer", "HomeHub");
         builder.UseSetting("Jwt:Audience", "HomeHub");
+        builder.UseSetting("RateLimiting:AuthPermitLimit", "1000");
+        builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:4200");
 
         builder.ConfigureTestServices(services =>
         {

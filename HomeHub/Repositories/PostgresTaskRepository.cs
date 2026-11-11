@@ -131,7 +131,7 @@ namespace HomeHub.Repositories
                        end_date = @EndDate, 
                        recurrence = @Recurrence, 
                        room_id = @RoomId 
-                   WHERE id = @Id;";
+                   WHERE id = @Id AND user_id = @UserId;";
 
             connection.Execute(sql, task);
         }

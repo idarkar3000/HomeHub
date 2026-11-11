@@ -5,6 +5,7 @@ using System.Text;
 using HomeHub.Models;
 using HomeHub.Models.Dtos;
 using HomeHub.Repositories;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
@@ -46,7 +47,7 @@ namespace HomeHub.Endpoints
                 }
 
                 return Results.Created($"/api/users/{user.Id}", new { user.Id, user.Email });
-            });
+            }).RequireRateLimiting("auth");
 
             app.MapPost("/api/auth/login", (LoginRequest request, IUserRepository repository, IConfiguration configuration) =>
             {
@@ -64,7 +65,7 @@ namespace HomeHub.Endpoints
                 };
 
                 return Results.Ok(response);
-            });
+            }).RequireRateLimiting("auth");
         }
 
         private static string CreateToken(User user, IConfiguration configuration)

@@ -58,7 +58,7 @@ namespace HomeHub.Repositories
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
-            string sql = @"UPDATE rooms SET name = @Name, icon = @Icon WHERE id = @Id;";
+            string sql = @"UPDATE rooms SET name = @Name, icon = @Icon WHERE id = @Id AND user_id = @UserId;";
             connection.Execute(sql, room);
         }
 

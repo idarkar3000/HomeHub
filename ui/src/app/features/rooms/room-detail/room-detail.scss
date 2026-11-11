@@ -1,7 +1,7 @@
 .room-detail {
   position: relative;
   min-height: 100%;
-  padding: 0.5rem 1rem calc(5rem + var(--app-fab-offset, 0px));
+  padding: 4.5rem 1rem calc(5rem + var(--app-fab-offset, 0px));
 
   &__header {
     display: flex;
@@ -71,6 +71,7 @@
   padding: 0.25rem 0.25rem 0.25rem 0.75rem;
   border-radius: 14px;
   background: var(--mat-sys-surface-container);
+  animation: rise-in 0.4s ease both;
 
   &--done {
     .task__title {
@@ -126,5 +127,56 @@
 
   &__delete {
     color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+@for $i from 1 through 15 {
+  .task:nth-child(#{$i}) {
+    animation-delay: #{$i * 0.035}s;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task {
+    animation: none;
+  }
+}
+
+@media (min-width: 960px) {
+  .room-detail {
+    padding: 5rem 2rem calc(5rem + var(--app-fab-offset, 0px));
+
+    &__title {
+      max-width: 640px;
+
+      h1 {
+        white-space: normal;
+      }
+    }
+
+    &__filters {
+      max-width: 640px;
+    }
+  }
+
+  .task-list {
+    max-width: 640px;
+  }
+
+  .task {
+    padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+    border-radius: 16px;
   }
 }

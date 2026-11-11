@@ -1,17 +1,39 @@
 .notes-page {
-  padding: 1rem;
+  padding: 4.5rem 1rem 1rem;
 
   &__header {
-    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
 
     h1 {
       margin: 0;
-      font: var(--mat-sys-headline-small);
+      font: 700 1.55rem/1.25 'Fredoka', sans-serif;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  &__tile {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--mat-sys-primary), var(--mat-sys-tertiary));
+    color: #fff;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
     }
   }
 
   &__subtitle {
-    margin: 0.25rem 0 0;
+    margin: 0.1rem 0 0;
     font: var(--mat-sys-body-medium);
     color: var(--mat-sys-on-surface-variant);
   }
@@ -47,25 +69,28 @@
 }
 
 .shop-cat {
+  --cat-accent: var(--mat-sys-primary);
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  padding: 0.2rem 0.7rem;
-  border: 1px solid var(--mat-sys-outline-variant);
+  padding: 0.25rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--cat-accent) 35%, transparent);
   border-radius: 999px;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-label-large);
-  cursor: pointer;
+  background: color-mix(in srgb, var(--cat-accent) 9%, transparent);
+  color: color-mix(in srgb, var(--cat-accent) 80%, var(--mat-sys-on-surface));
+  font: 500 0.8rem/1.2 'Nunito', sans-serif;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 
   &--active {
-    background: var(--mat-sys-primary-container);
-    border-color: var(--mat-sys-primary);
-    color: var(--mat-sys-on-primary-container);
+    background: color-mix(in srgb, var(--cat-accent) 26%, transparent);
+    border-color: color-mix(in srgb, var(--cat-accent) 65%, transparent);
   }
 
   &--add {
     border-style: dashed;
+    border-color: var(--mat-sys-outline-variant);
+    background: transparent;
+    color: var(--mat-sys-on-surface-variant);
     gap: 0.2rem;
 
     mat-icon {
@@ -139,6 +164,13 @@
   padding: 0.35rem 0.35rem 0.35rem 0.75rem;
   border-radius: 14px;
   background: var(--mat-sys-surface-container);
+  animation: rise-in 0.4s ease both;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
 
   &--done .note__content {
     text-decoration: line-through;
@@ -169,5 +201,53 @@
       background: var(--mat-sys-surface-container-high);
       color: var(--mat-sys-on-surface-variant);
     }
+  }
+}
+
+@for $i from 1 through 15 {
+  .note:nth-child(#{$i}) {
+    animation-delay: #{$i * 0.035}s;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note {
+    animation: none;
+  }
+}
+
+@media (min-width: 960px) {
+  .notes-page {
+    padding: 5.5rem 2rem 2rem;
+
+    &__header {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .notes-page__switch,
+  .shop-cats,
+  .notes-page__category-form,
+  .notes-page__add,
+  .note-list,
+  .shop-group {
+    max-width: 640px;
+  }
+
+  .note {
+    padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+    border-radius: 16px;
   }
 }

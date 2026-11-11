@@ -1,11 +1,80 @@
 <section class="rooms">
-  <header class="rooms__header">
-    <h1>Mis habitaciones</h1>
-    <p>
-      {{ rooms().length }}
-      {{ rooms().length === 1 ? 'habitación' : 'habitaciones' }}
-    </p>
+  <header class="hero">
+    <span class="hero__blob hero__blob--one"></span>
+    <span class="hero__blob hero__blob--two"></span>
+    <span class="hero__grain"></span>
+
+    <div class="hero__body">
+      <p class="hero__date">{{ today | date: 'EEEE, d MMMM' }}</p>
+      <h1 class="hero__title">{{ headline() }}</h1>
+
+      <div class="hero__chips">
+        <span class="chip">
+          <mat-icon>today</mat-icon>
+          {{ todayTasks().length }} para hoy
+        </span>
+        <span class="chip">
+          <mat-icon>inventory_2</mat-icon>
+          {{ totalPending() }} pendientes
+        </span>
+        <span class="chip">
+          <mat-icon>task_alt</mat-icon>
+          {{ completedCount() }} hechas
+        </span>
+        @if (nextTask(); as task) {
+          <span class="chip">
+            <mat-icon>schedule</mat-icon>
+            {{ task.title }} · {{ task.dueDate | date: 'd MMM' }}
+          </span>
+        }
+      </div>
+    </div>
+
+    @if (allTodayTasks().length > 0) {
+      <div class="hero__ring" title="Progreso de hoy">
+        <svg viewBox="0 0 64 64" class="hero__ring-svg">
+          <circle class="hero__ring-track" cx="32" cy="32" [attr.r]="ringRadius" />
+          <circle
+            class="hero__ring-value"
+            cx="32"
+            cy="32"
+            [attr.r]="ringRadius"
+            [style.stroke-dasharray]="ringCircumference"
+            [style.stroke-dashoffset]="ringOffset()"
+          />
+        </svg>
+        <span class="hero__ring-count">
+          <b>{{ todayDone() }}</b>
+          <small>/{{ allTodayTasks().length }}</small>
+        </span>
+      </div>
+    }
   </header>
+
+  @if (todayTasks().length > 0) {
+    <section class="rooms__today">
+      <div class="rooms__today-head">
+        <span class="rooms__today-icon"><mat-icon>bolt</mat-icon></span>
+        <h2>Para hoy</h2>
+      </div>
+      <ul class="today-list">
+        @for (task of todayTasks(); track task.id) {
+          <li class="today-task">
+            <mat-checkbox
+              [checked]="task.isCompleted"
+              (change)="toggleTodayTask(task)"
+              aria-label="Hecho"
+            />
+            <span class="today-task__title">{{ task.title }}</span>
+            <span class="today-task__room">
+              <mat-icon>meeting_room</mat-icon>
+              {{ roomName(task.roomId) }}
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 
   @if (rooms().length === 0) {
     <app-empty-state
@@ -19,34 +88,70 @@
       </button>
     </app-empty-state>
   } @else {
+    <h2 class="rooms__section">Habitaciones</h2>
+
     <div class="rooms__grid">
       @for (room of rooms(); track room.id) {
-        <mat-card class="room-card" appearance="outlined" (click)="openRoom(room)">
-          <div class="room-card__icon">
-            <mat-icon>{{ room.icon || 'meeting_room' }}</mat-icon>
+        <mat-card
+          class="room-card"
+          appearance="outlined"
+          [style.--room-accent]="accentFor(room.id)"
+          (click)="openRoom(room)"
+        >
+          <div class="room-card__top">
+            <div class="room-card__icon">
+              <mat-icon>{{ room.icon || 'meeting_room' }}</mat-icon>
+            </div>
+            <button
+              mat-icon-button
+              class="room-card__menu"
+              [matMenuTriggerFor]="menu"
+              (click)="$event.stopPropagation()"
+              aria-label="Opciones de la habitación"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="editRoom(room, $event)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button mat-menu-item (click)="deleteRoom(room, $event)">
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
           </div>
+
           <h2 class="room-card__name">{{ room.name }}</h2>
-          <button
-            mat-icon-button
-            class="room-card__menu"
-            [matMenuTriggerFor]="menu"
-            (click)="$event.stopPropagation()"
-            aria-label="Opciones de la habitación"
-          >
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editRoom(room, $event)">
-              <mat-icon>edit</mat-icon>
-              <span>Editar</span>
-            </button>
-            <button mat-menu-item (click)="deleteRoom(room, $event)">
-              <mat-icon>delete</mat-icon>
-              <span>Eliminar</span>
-            </button>
-          </mat-menu>
+
+          @if (pendingCount(room.id) > 0) {
+            <span class="room-card__badge">{{ pendingCount(room.id) }}</span>
+          }
+
+          <div class="room-card__progress">
+            <mat-progress-bar
+              mode="determinate"
+              [value]="roomProgress(room.id)"
+              aria-label="Progreso de la habitación"
+            />
+            <span class="room-card__progress-label">{{ roomProgress(room.id) }}%</span>
+          </div>
+
+          @if (nextRoomTask(room.id); as task) {
+            <p class="room-card__next">
+              <mat-icon>schedule</mat-icon>
+              {{ task.title }}
+              <span class="room-card__next-date"> · {{ task.dueDate | date: 'd MMM' }}</span>
+            </p>
+          }
         </mat-card>
       }
+
+      <button type="button" class="room-card room-card--ghost" (click)="addRoom()">
+        <span class="room-card__ghost-icon"><mat-icon>add</mat-icon></span>
+        <span class="room-card__ghost-label">Añadir habitación</span>
+      </button>
     </div>
   }
 

@@ -21,10 +21,13 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        var headerValue = Context.Request.Headers["X-Test-User"].FirstOrDefault();
+        var userId = int.TryParse(headerValue, out var parsedUserId) ? parsedUserId : UserId;
+
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
-            new Claim(ClaimTypes.Email, "test@homehub.com")
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, $"user{userId}@homehub.com")
         };
 
         var identity = new ClaimsIdentity(claims, SchemeName);

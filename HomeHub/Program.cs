@@ -1,9 +1,15 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using HomeHub.Endpoints;
+using HomeHub.Health;
+using HomeHub.Hubs;
+using HomeHub.Middleware;
 using HomeHub.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,9 +39,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSignalR();
+
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 
 builder.Services.AddOpenApi();
 
@@ -51,7 +76,27 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+var authPermitLimit = builder.Configuration.GetValue("RateLimiting:AuthPermitLimit", 5);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context =>
+    {
+        var partitionKey = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = authPermitLimit,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
     });
 });
 
@@ -82,6 +127,13 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
 {
     var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+
+    app.Logger.LogError(
+        error,
+        "Unhandled exception while processing {Method} {Path}",
+        context.Request.Method,
+        context.Request.Path);
+
     context.Response.StatusCode = error is UnauthorizedAccessException
         ? StatusCodes.Status401Unauthorized
         : StatusCodes.Status500InternalServerError;
@@ -97,6 +149,8 @@ forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 
+app.UseSecurityHeaders(app.Environment.IsDevelopment());
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
@@ -104,7 +158,10 @@ app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRateLimiter();
+
 app.MapHealthEndpoints();
+app.MapHub<NotesHub>("/hubs/notes");
 app.MapRoomEndpoints();
 app.MapTaskEndpoints();
 app.MapNoteEndpoints();

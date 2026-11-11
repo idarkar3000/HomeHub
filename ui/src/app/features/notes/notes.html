@@ -1,7 +1,10 @@
 <section class="notes-page">
   <header class="notes-page__header">
-    <h1>{{ title() }}</h1>
-    <p class="notes-page__subtitle">Tus notas y listas de la compra</p>
+    <span class="notes-page__tile"><mat-icon>edit_note</mat-icon></span>
+    <div>
+      <h1>{{ title() }}</h1>
+      <p class="notes-page__subtitle">{{ notes().length }} {{ kind() === 'shopping' ? 'productos' : 'apuntes' }}</p>
+    </div>
   </header>
 
   <mat-button-toggle-group
@@ -33,7 +36,11 @@
       </button>
 
       @for (category of categories(); track category.id) {
-        <span class="shop-cat" [class.shop-cat--active]="categoryFilter() === category.id">
+        <span
+          class="shop-cat"
+          [class.shop-cat--active]="categoryFilter() === category.id"
+          [style.--cat-accent]="accentFor(category.id)"
+        >
           <button type="button" class="shop-cat__label" (click)="selectCategory(category.id)">
             {{ category.name }}
           </button>

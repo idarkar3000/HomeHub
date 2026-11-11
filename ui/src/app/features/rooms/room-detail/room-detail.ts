@@ -37,7 +37,7 @@ export class RoomDetail implements OnInit {
   private roomId = 0;
 
   readonly room = signal<Room | null>(null);
-  readonly tasks = this.taskService.tasks;
+  readonly tasks = signal<TaskItem[]>([]);
   readonly filter = signal<TaskFilter>('all');
 
   readonly filteredTasks = computed(() => {
@@ -157,6 +157,6 @@ export class RoomDetail implements OnInit {
   }
 
   private refreshTasks(): void {
-    this.taskService.loadByRoom(this.roomId).subscribe();
+    this.taskService.loadByRoom(this.roomId).subscribe((tasks) => this.tasks.set(tasks));
   }
 }

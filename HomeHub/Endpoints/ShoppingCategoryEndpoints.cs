@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using HomeHub.Hubs;
 using HomeHub.Models;
 using HomeHub.Models.Dtos;
 using HomeHub.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 
 namespace HomeHub.Endpoints
@@ -15,7 +17,7 @@ namespace HomeHub.Endpoints
                 return Results.Ok(repository.GetAll(user.GetUserId()));
             }).RequireAuthorization();
 
-            app.MapPost("/api/shopping-categories", (ShoppingCategoryRequest request, IShoppingCategoryRepository repository, ClaimsPrincipal user) =>
+            app.MapPost("/api/shopping-categories", async (ShoppingCategoryRequest request, IShoppingCategoryRepository repository, IHubContext<NotesHub> hub, ClaimsPrincipal user) =>
             {
                 var name = (request.Name ?? string.Empty).Trim();
                 if (string.IsNullOrWhiteSpace(name))
@@ -40,15 +42,18 @@ namespace HomeHub.Endpoints
                     return Results.Conflict(new { error = "Ya tienes una etiqueta con ese nombre." });
                 }
 
+                await hub.Clients.Group(NotesHub.GroupName(userId)).SendAsync("notesChanged");
                 return Results.Created($"/api/shopping-categories/{category.Id}", category);
             }).RequireAuthorization();
 
-            app.MapDelete("/api/shopping-categories/{id}", (int id, IShoppingCategoryRepository repository, ClaimsPrincipal user) =>
+            app.MapDelete("/api/shopping-categories/{id}", async (int id, IShoppingCategoryRepository repository, IHubContext<NotesHub> hub, ClaimsPrincipal user) =>
             {
-                if (repository.GetById(id, user.GetUserId()) is null)
+                var userId = user.GetUserId();
+                if (repository.GetById(id, userId) is null)
                     return Results.NotFound();
 
-                repository.Delete(id, user.GetUserId());
+                repository.Delete(id, userId);
+                await hub.Clients.Group(NotesHub.GroupName(userId)).SendAsync("notesChanged");
                 return Results.NoContent();
             }).RequireAuthorization();
         }

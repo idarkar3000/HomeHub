@@ -1,119 +1,165 @@
 # HomeHub
 
-Aplicación full-stack para la gestión integral de estancias y tareas del hogar. Está formada por una API REST en .NET y una aplicación web en Angular.
+Aplicación full-stack para organizar las tareas del hogar: habitaciones, tareas recurrentes, calendario con arrastrar y soltar, notas y lista de la compra compartida con actualización en tiempo real. Instalable como app (PWA) y con modo oscuro.
 
-## Estructura del Repositorio
+[![CI](https://github.com/idarkar3000/HomeHub/actions/workflows/ci.yml/badge.svg)](https://github.com/idarkar3000/HomeHub/actions/workflows/ci.yml)
+![.NET](https://img.shields.io/badge/.NET-10-512BD4)
+![Angular](https://img.shields.io/badge/Angular-22-dd0031)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791)
+![PWA](https://img.shields.io/badge/PWA-instalable-5A0FC8)
 
-- `HomeHub/`: API REST en .NET (Minimal APIs + Dapper + PostgreSQL).
-- `ui/`: Aplicación web en Angular con Angular Material.
+## Demo
 
-# Backend
+La aplicación está desplegada y lista para probar: **[home-hub-pearl.vercel.app](https://home-hub-pearl.vercel.app)**
 
-API REST desarrollada en .NET con arquitectura basada en Minimal APIs, Dapper y PostgreSQL para la gestión integral de estancias y tareas del hogar.
+Regístrate desde la propia app (el registro está abierto) o usa dos dispositivos con la misma cuenta para ver la sincronización en tiempo real de la lista de la compra.
 
-## Tecnologías
+<p align="center">
+  <img src="docs/screenshots/arrastrar-calendario.png" alt="Arrastrar una tarea de la bandeja al calendario para agendarla" width="820">
+</p>
 
-- **Lenguaje:** C# (.NET)
-- **Framework:** ASP.NET Core (Minimal APIs)
-- **Acceso a datos:** Dapper (Micro-ORM)
-- **Base de datos:** PostgreSQL
-- **Documentación:** Swagger / OpenAPI
+## Capturas
 
-## Estructura del Proyecto
+Vistas reales de la aplicación desplegada. Las imágenes están en [`docs/screenshots/`](docs/screenshots/).
 
-- `Endpoints/`: Definición de las rutas HTTP agrupadas por dominios (`RoomEndpoints`, `TaskEndpoints`, `NoteEndpoints`).
-- `Repositories/`: Capa de persistencia e implementación de consultas SQL con Dapper (`PostgresRoomRepository`, `PostgresTaskRepository`, `PostgresNoteRepository`).
-- `Models/`: Entidades de dominio (`Room`, `TaskItem`, `Note`) y utilidades (`Recurrence`).
-- `Models/Dtos/`: Objetos de entrada para las peticiones (`RoomRequest`, `TaskRequest`, `NoteRequest`).
+| Hogar | Calendario |
+|---|---|
+| <img src="docs/screenshots/hogar.png" alt="Vista Hogar con progreso del día, tareas para hoy y tarjetas de habitaciones" width="480"> | <img src="docs/screenshots/calendario.png" alt="Calendario mensual con tareas agendadas y bandeja de tareas sin fecha" width="480"> |
 
-## Endpoints Principales
+| Lista de la compra | Notas |
+|---|---|
+| <img src="docs/screenshots/compra.png" alt="Lista de la compra agrupada por etiquetas de supermercado" width="480"> | <img src="docs/screenshots/notas.png" alt="Notas rápidas con varios apuntes y uno completado" width="480"> |
 
-### Habitaciones (`/api/rooms`)
-- `GET /api/rooms`: Obtiene el listado completo de habitaciones.
-- `GET /api/rooms/{id}`: Obtiene una habitación por su identificador.
-- `POST /api/rooms`: Crea una nueva habitación.
-- `PUT /api/rooms/{id}`: Actualiza una habitación existente.
-- `DELETE /api/rooms/{id}`: Elimina una habitación y sus tareas asociadas en cascada.
+| Modo oscuro | Iniciar sesión |
+|---|---|
+| <img src="docs/screenshots/modo-oscuro.png" alt="Vista Hogar con el tema oscuro activado" width="480"> | <img src="docs/screenshots/login.png" alt="Pantalla de inicio de sesión de HomeHub" width="480"> |
 
-### Tareas (`/api/tasks`)
-- `GET /api/tasks`: Obtiene todas las tareas.
-- `GET /api/tasks/{id}`: Obtiene una tarea por su identificador.
-- `GET /api/tasks/calendar`: Obtiene las tareas ordenadas por fecha de vencimiento.
-- `GET /api/rooms/{roomId}/tasks`: Obtiene las tareas filtradas por habitación.
-- `POST /api/rooms/{roomId}/tasks`: Crea una nueva tarea dentro de una habitación.
-- `PUT /api/tasks/{id}`: Actualiza una tarea existente.
-- `PATCH /api/tasks/{id}/toggle`: Cambia el estado de completado de una tarea. Si la tarea es recurrente, avanza su fecha a la siguiente repetición.
-- `DELETE /api/tasks/{id}`: Elimina una tarea por su identificador.
+## Funcionalidades
 
-Las tareas admiten una recurrencia (`none`, `daily`, `weekly`, `monthly`) y una fecha de vencimiento opcional. La fecha puede ser de **día completo** (solo `dueDate`) o cubrir una **franja horaria** (con `endDate`).
+- **Habitaciones**: organiza las tareas por estancias, con progreso y próxima tarea de cada una.
+- **Tareas**: fecha de vencimiento con día completo o franja horaria, recurrencia (diaria, semanal, mensual) que avanza al completar.
+- **Calendario** (FullCalendar): mes/semana/día, arrastrar y soltar para agendar (también táctil) y bandeja lateral de tareas sin fecha.
+- **Notas y lista de la compra**: notas rápidas y compra con **etiquetas** (Mercadona, Día...) para filtrar y agrupar.
+- **Tiempo real** (SignalR): cualquier cambio en notas o etiquetas se refleja al instante en el resto de dispositivos de la cuenta.
+- **PWA**: instalable en Android/iOS/escritorio, funciona como app nativa.
+- **Modo oscuro**: botón de tema en la barra superior, recuerda la preferencia y por defecto sigue al sistema.
+- **Salud y monitorización**: endpoint `/health` que comprueba PostgreSQL y es sondeado por UptimeRobot para evitar el arranque frío del plan free de Render.
 
-### Notas y lista de la compra (`/api/notes`)
-- `GET /api/notes`: Obtiene las notas (permite filtrar por tipo con `?kind=note|shopping`).
-- `GET /api/notes/{id}`: Obtiene una nota por su identificador.
-- `POST /api/notes`: Crea una nota o elemento de la compra.
-- `PUT /api/notes/{id}`: Actualiza una nota existente.
-- `PATCH /api/notes/{id}/toggle`: Marca o desmarca una nota como hecha.
-- `DELETE /api/notes/{id}`: Elimina una nota por su identificador.
+## Arquitectura
 
-## Configuración y Ejecución
+```mermaid
+flowchart LR
+    subgraph Cliente["Cliente (PWA)"]
+        UI[Angular 22 · zoneless · señales]
+    end
+    subgraph Render["API (Render)"]
+        API[.NET 10 Minimal APIs]
+        HUB[SignalR Hub]
+    end
+    subgraph Neon["Base de datos (Neon)"]
+        DB[(PostgreSQL 18)]
+    end
+    UI -->|REST + JWT| API
+    UI <-->|WebSockets| HUB
+    API -->|Dapper| DB
+```
 
-1. Configurar la cadena de conexión en el archivo `appsettings.json`:
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Host=localhost;Database=homehub;Username=tu_usuario;Password=tu_contraseña"
-   }
-   ```
+| Capa | Tecnología |
+|---|---|
+| Frontend | Angular 22 (standalone, zoneless, señales), Angular Material 3, FullCalendar, PWA |
+| Backend | .NET 10 Minimal APIs, Dapper, SignalR, JWT |
+| Base de datos | PostgreSQL 18 (Neon) |
+| Despliegue | Vercel (frontend), Render (API, Docker), Neon (BD) |
+| Tests | xUnit + WebApplicationFactory (integración de API con repositorios fake) |
 
-2. Ejecutar el proyecto:
-   ```bash
-   dotnet run --project HomeHub
-   ```
+## Decisiones técnicas
 
-3. Acceder a la documentación Swagger en `http://localhost:5092/swagger`.
+- **Minimal APIs + Dapper** en lugar de controllers + EF Core: menos abstracción y SQL explícito, que es lo que se necesita en una API CRUD pequeña.
+- **Angular zoneless con señales**: sin zonas, el estado de la UI se actualiza solo donde cambia.
+- **Tests de integración de la API real** (`WebApplicationFactory`) sustituyendo los repositorios por fakes en memoria: se prueba el pipeline completo (routing, auth, validación) sin tocar la base de datos.
+- **SignalR con grupos por usuario**: cada conexión se une al grupo de su cuenta, así los cambios solo viajan a los dispositivos que interesan.
+- **Aislamiento por usuario en todas las consultas**: lecturas, actualizaciones y borrados filtran por `user_id`, no solo por `id`. Los tests de ownership comprueban que una cuenta no puede tocar datos de otra.
+- **Rate limiting por IP en autenticación**, cabeceras de seguridad y health check que comprueba PostgreSQL de verdad.
+- **Migraciones idempotentes en el arranque** (`CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`): sin herramienta externa de migraciones para un proyecto de este tamaño.
 
-# Frontend
+## Estructura del repositorio
 
-Aplicación SPA con enfoque mobile-first construida con Angular y Angular Material. Se organiza en tres secciones: **Hogar** (habitaciones y sus tareas), **Calendario** (tareas programadas; arrastra y suelta para asignar un día completo o una franja horaria) y **Notas / Lista de la compra**. En móvil usa una **barra de navegación inferior** al estilo de una app Android, y barra lateral en escritorio.
+```
+HomeHub/                     API .NET
+  Endpoints/                 Rutas agrupadas por dominio (rooms, tasks, notes...)
+  Hubs/                      SignalR (NotesHub)
+  Models/ y Models/Dtos/     Entidades y objetos de petición
+  Repositories/              Persistencia con Dapper + PostgreSQL
+tests/HomeHub.Tests/         Tests de integración (xUnit)
+ui/                          Aplicación Angular
+  src/app/core/              modelos, servicios, guards e interceptores
+  src/app/features/          páginas (rooms, calendar, notes, auth)
+  src/app/shared/            componentes reutilizables
+docs/screenshots/            Capturas usadas en este README
+```
 
-## Tecnologías
+## API
 
-- **Framework:** Angular 22 (standalone components, señales y zoneless).
-- **UI:** Angular Material.
-- **Calendario:** FullCalendar.
-- **Cliente HTTP:** `provideHttpClient` con servicios basados en `Observable` y estado con señales.
+Toda la API requiere JWT salvo autenticación y salud. Documentación OpenAPI en desarrollo en `/swagger`.
 
-## Estructura del Proyecto
+- `POST /api/auth/register` · `POST /api/auth/login`
+- `GET|POST|PUT|DELETE /api/rooms`
+- `GET|POST|PUT|PATCH|DELETE /api/tasks` (incluye `PATCH /toggle` con avance de recurrencia y `GET /calendar`)
+- `GET|POST|PUT|PATCH|DELETE /api/notes` (notas y lista de la compra con `kind` y `categoryId`)
+- `GET|POST|DELETE /api/shopping-categories`
+- `GET /health` · `GET /`
+- WebSocket: `/hubs/notes`
 
-- `src/app/core/models/`: Modelos de datos (`Room`, `TaskItem`, `Note`) y de peticiones.
-- `src/app/core/services/`: Servicios de acceso a la API (`RoomService`, `TaskService`, `NoteService`).
-- `src/app/features/rooms/`: Sección Hogar (listado de habitaciones, detalle y formularios).
-- `src/app/features/calendar/`: Calendario interactivo con arrastrar y soltar.
-- `src/app/features/notes/`: Notas y lista de la compra.
-- `src/app/features/tasks/`: Formulario de creación y edición de tareas.
-- `src/app/shared/`: Componentes reutilizables (`EmptyState`, `ConfirmDialog`).
-- `src/environments/`: Configuración por entorno (URL de la API).
+## Desarrollo local
 
-## Configuración y Ejecución
+Requisitos: .NET 10 SDK, Node 24, PostgreSQL.
 
-1. Arrancar la API (ver sección Backend) en `http://localhost:5092`.
-2. Instalar las dependencias:
-   ```bash
-   cd ui
-   npm install
-   ```
-3. Arrancar el servidor de desarrollo:
-   ```bash
-   npm start
-   ```
-4. Abrir `http://localhost:4200` en el navegador.
+1. Configura los secretos en local. Puedes copiar `HomeHub/appsettings.Example.json` a
+   `HomeHub/appsettings.Development.json` (ignorado por git) o usar user-secrets:
 
-> La URL de la API se configura en `ui/src/environments/environment.ts`.
+```bash
+dotnet user-secrets init --project HomeHub
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=homehub;Username=homehub;Password=homehub" --project HomeHub
+dotnet user-secrets set "Jwt:Key" "una-clave-larga-y-aleatoria-para-desarrollo-local" --project HomeHub
+dotnet user-secrets set "Jwt:Issuer" "HomeHub" --project HomeHub
+dotnet user-secrets set "Jwt:Audience" "HomeHub" --project HomeHub
+```
 
-## Compilación
+> No subas nunca `appsettings.json` ni `appsettings.Development.json` con credenciales reales.
+> El repositorio ya los ignora; usa `appsettings.Example.json` como plantilla sin secretos.
+
+2. Arranca el backend:
+
+```bash
+dotnet run --project HomeHub
+```
+
+3. Arranca el frontend en otra terminal:
 
 ```bash
 cd ui
-npm run build
+npm ci
+npm start
 ```
 
-Los artefactos se generan en `ui/dist/`.
+Abre `http://localhost:4200`. Las tablas se crean solas al arrancar la API.
+
+## Tests
+
+```bash
+# Backend: API completa en memoria con repositorios fake
+dotnet test tests/HomeHub.Tests/HomeHub.Tests.csproj
+
+# Frontend: servicios, guard e interceptor con Vitest
+cd ui
+npm test -- --watch=false
+```
+
+Los tests de backend cubren autenticación, validaciones, todos los endpoints y el aislamiento de datos entre usuarios. Los de frontend cubren la sesión, el guard de rutas y el interceptor de autenticación. El CI ejecuta ambas suites, compila la API y genera el build de producción de Angular.
+
+## Despliegue
+
+- **Frontend** en Vercel desde `ui/` (build de Angular + PWA service worker).
+- **API** en Render desde el `Dockerfile`, con variables de entorno para cadena de conexión, JWT y CORS.
+- **Base de datos** en Neon (PostgreSQL serverless).
+- `GET /health` monitorizado con UptimeRobot cada 5 minutos para mantener la API despierta en el plan gratuito.

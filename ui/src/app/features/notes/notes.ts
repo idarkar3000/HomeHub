@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleChange, MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -10,6 +10,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Note, NoteKind } from '../../core/models/note.model';
 import { ShoppingCategory } from '../../core/models/shopping-category.model';
 import { NoteService } from '../../core/services/note.service';
+import { RealtimeService } from '../../core/services/realtime.service';
 import { ShoppingCategoryService } from '../../core/services/shopping-category.service';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { TouchErrorStateMatcher } from '../../shared/touch-error-state-matcher';
@@ -36,10 +37,13 @@ interface CategoryGroup {
   templateUrl: './notes.html',
   styleUrl: './notes.scss',
 })
-export class NotesPage implements OnInit {
+export class NotesPage implements OnInit, OnDestroy {
   private readonly noteService = inject(NoteService);
   private readonly categoryService = inject(ShoppingCategoryService);
+  private readonly realtime = inject(RealtimeService);
   private readonly fb = inject(FormBuilder);
+
+  private unsubscribeRealtime?: () => void;
 
   readonly notes = this.noteService.notes;
   readonly categories = this.categoryService.categories;
@@ -47,6 +51,17 @@ export class NotesPage implements OnInit {
   readonly categoryFilter = signal<number | null>(null);
   readonly creatingCategory = signal(false);
   readonly errorStateMatcher = new TouchErrorStateMatcher();
+
+  private readonly accents = [
+    '#e35d6a',
+    '#e8833a',
+    '#c9a227',
+    '#5ba85f',
+    '#3a9ea5',
+    '#4a7fd6',
+    '#8461d9',
+    '#c95d9e',
+  ];
 
   readonly title = computed(() => (this.kind() === 'shopping' ? 'Lista de la compra' : 'Notas'));
   readonly placeholder = computed(() =>
@@ -106,6 +121,11 @@ export class NotesPage implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.unsubscribeRealtime = this.realtime.onNotesChanged(() => this.load());
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribeRealtime?.();
   }
 
   setKind(event: MatButtonToggleChange): void {
@@ -117,6 +137,10 @@ export class NotesPage implements OnInit {
 
   selectCategory(id: number | null): void {
     this.categoryFilter.set(id);
+  }
+
+  accentFor(categoryId: number): string {
+    return this.accents[categoryId % this.accents.length];
   }
 
   toggleCategoryForm(): void {

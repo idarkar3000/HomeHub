@@ -5,11 +5,11 @@
 @if (isAuthenticated()) {
   <mat-sidenav-container class="app-shell">
     @if (!isHandset()) {
-      <mat-sidenav class="app-sidenav" mode="side" opened>
-        <div class="app-sidenav__brand">
+      <mat-sidenav class="app-sidenav" mode="side" [opened]="sidenavOpen()">
+        <a class="app-sidenav__brand" routerLink="/rooms" aria-label="Ir al inicio">
           <span class="app-sidenav__logo"><mat-icon>home</mat-icon></span>
           <span>HomeHub</span>
-        </div>
+        </a>
 
         <mat-nav-list>
           @for (item of navItems; track item.path) {
@@ -21,10 +21,14 @@
         </mat-nav-list>
 
         <div class="app-sidenav__footer">
-          <span class="app-sidenav__email">{{ email() }}</span>
-          <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión">
-            <mat-icon>logout</mat-icon>
-          </button>
+          <span
+            class="app-live"
+            [class.app-live--on]="liveConnected()"
+            [class.app-live--offline]="liveStatus() === 'offline'"
+          >
+            <span class="app-live__dot"></span>
+            {{ liveLabel() }}
+          </span>
         </div>
       </mat-sidenav>
     }
@@ -33,16 +37,37 @@
       class="app-shell__content"
       [class.app-shell__content--handset]="isHandset()"
     >
-      <mat-toolbar class="app-toolbar">
-        <span class="app-toolbar__logo"><mat-icon>home</mat-icon></span>
-        <span class="app-toolbar__title">HomeHub</span>
-        @if (isHandset()) {
-          <span class="app-toolbar__spacer"></span>
-          <span class="app-toolbar__email">{{ email() }}</span>
-          <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión">
-            <mat-icon>logout</mat-icon>
+      <mat-toolbar class="app-toolbar" [class.app-toolbar--desktop]="!isHandset()">
+        @if (!isHandset()) {
+          <button
+            mat-icon-button
+            class="app-toolbar__menu"
+            (click)="toggleSidenav()"
+            aria-label="Mostrar u ocultar el menú"
+          >
+            <mat-icon>menu</mat-icon>
           </button>
         }
+        <a class="app-toolbar__brand" routerLink="/rooms" aria-label="Ir al inicio">
+          <span class="app-toolbar__logo"><mat-icon>home</mat-icon></span>
+          <span class="app-toolbar__title">HomeHub</span>
+          <span
+            class="app-toolbar__live"
+            [class.app-toolbar__live--on]="liveConnected()"
+            [title]="liveLabel()"
+          ></span>
+        </a>
+        <span class="app-toolbar__spacer"></span>
+        <button
+          mat-icon-button
+          (click)="toggleTheme()"
+          [attr.aria-label]="isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        >
+          <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión">
+          <mat-icon>logout</mat-icon>
+        </button>
       </mat-toolbar>
 
       <div class="app-page">
